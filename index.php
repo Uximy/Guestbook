@@ -1,6 +1,6 @@
 <?php
 	include_once('./db.php');
-	$db = connect('localhost', 'root', '', 'books');
+	$db = connect('localhost', 'uximy', '', 'books');
 
 	$input = $_POST['save'] ?? 0;
 
@@ -86,30 +86,43 @@
 
 		<div id="wrapper">
 			<h1>Гостевая книга</h1>
-			<?php RenderListReview($input, $db, $arr, $art, $kol); ?>
-			<div>
-				<nav>
-					<ul class="pagination">
-						<li>
-							<a href="?page=1"  aria-label="Previous">
-								<span aria-hidden="true">&laquo;</span>
-							</a>
-						</li>
-						<?php
-							for ($i = 1; $i <= $str_pag; $i++){
-								echo '<li><a href=?page='.$i.'>'.$i.'</a></li>';
-							}
-						?>
-						<li>
-							<a href="?page=<?php echo (int)$str_pag ?>" aria-label="Next">
-								<span aria-hidden="true">&raquo;</span>
-							</a>
-						</li>
-					</ul>
-				</nav>
-			</div>
+			<?php 
+			
+			RenderListReview($input, $db, $arr, $art, $kol);
+
+			echo "<div>";
+				echo "<nav>";
+			if (!$str_pag == 0) {
+				echo "<ul class='pagination'>";
+					echo "
+					<li>
+						<a href='?page=1'  aria-label='Previous'>
+							<span aria-hidden='true'>&laquo;</span>
+						</a>
+					</li>
+					";
+					for ($i = 1; $i <= $str_pag; $i++){
+						echo '<li><a href=?page='.$i.'>'.$i.'</a></li>';
+					}
+					echo "
+					<li>
+						<a href=?page=".(int)$str_pag ." aria-label='Next'>
+							<span aria-hidden='true'>&raquo;</span>
+						</a>
+					</li>
+					";
+					echo "</ul>";
+			}else{
+				echo "
+					<p style='display: flex;justify-content: center;margin: 20px 0;'>В моей базе нету данных!</p>
+				";
+			}
+				echo "</nav>";
+			echo "</div>";
+			?>
+
 			<div id="form">
-				<form method="POST">
+				<form action='http://localhost/work/miniproekty/' method="POST">
 					<p><input class="form-control" name="Nick" placeholder="Ваше имя"></p>
 					<p><textarea class="form-control" name="Text" placeholder="Ваш отзыв"></textarea></p>
 					<p><input type="submit" name="save" class="btn btn-info btn-block" value="Сохранить"></p>
