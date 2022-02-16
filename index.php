@@ -14,23 +14,6 @@
 
 	$art = ($page * $kol) - $kol;
 
-	$res = $db->query("SELECT COUNT(*) FROM `review`");
-
-	$row = $res->fetch();
-
-	$total = $row[0];
-
-	$str_pag = ceil($total / $kol);
-
-	function sort_date($a_new, $b_new) {
-
-		$a_new = strtotime($a_new["date"]);
-		$b_new = strtotime($b_new["date"]);
-	
-		return $b_new - $a_new;
-	
-	}
-
 	function RenderListReview($input, $db, $arr, $art, $kol)
 	{
 		if ($input) {
@@ -47,9 +30,26 @@
 			";
 		}
 
+		function sort_date($a_new, $b_new) {
+
+			$a_new = strtotime($a_new["date"]);
+			$b_new = strtotime($b_new["date"]);
+		
+			return $b_new - $a_new;
+		
+		}
+
 		$result = $db->query("SELECT * FROM `review` LIMIT $art, $kol")->fetchAll();
 
-		if (!is_null($result)) {
+		$res = $db->query("SELECT COUNT(*) FROM `review`");
+
+		$row = $res->fetch();
+	
+		$total = $row[0];
+	
+		$str_pag = (int)ceil($total / $kol);
+
+		if ($result) {
 			usort($result, "sort_date");
 			foreach ($result as $k => $value) {
 				$dateresylt = $db->query("SELECT DATE_FORMAT('$value[3]', '%d.%m.%Y %H:%i:%s')")->fetchAll()[0];
@@ -66,6 +66,28 @@
 				</div>		
 				";
 			}
+			echo "
+				<nav>
+					<ul class='pagination'>
+						<li>
+							<a href='?page=1' aria-label='Previous'>
+								<span aria-hidden='true'>&laquo;</span>
+							</a>
+						</li>";
+				for ($i = 1; $i <= $str_pag; $i++){
+					echo '<li><a href=?page='.$i.'>'.$i.'</a></li>';
+				}
+				echo "
+						<li>
+							<a href=?page=".$str_pag ." aria-label='Next'>
+								<span aria-hidden='true'>&raquo;</span>
+							</a>
+						</li>
+					</ul>
+				</nav>";
+		}
+		else{
+			echo "<p style='display: flex;justify-content: center;margin: 20px 0;'>В моей базе нету данных!</p>";
 		}
 	}
 ?>
@@ -82,54 +104,20 @@
 		<link rel="icon" type="image/png" href="favicon.png" />
 	</head>
 	<body>
-		
-
 		<div id="wrapper">
-			<h1>Гостевая книга</h1>
-			<?php 
-			
-			RenderListReview($input, $db, $arr, $art, $kol);
+			<h1><a href="/" style="text-decoration: none;">Гостевая книга</a></h1>
 
-			echo "<div>";
-				echo "<nav>";
-			if (!$str_pag == 0) {
-				echo "<ul class='pagination'>";
-					echo "
-					<li>
-						<a href='?page=1'  aria-label='Previous'>
-							<span aria-hidden='true'>&laquo;</span>
-						</a>
-					</li>
-					";
-					for ($i = 1; $i <= $str_pag; $i++){
-						echo '<li><a href=?page='.$i.'>'.$i.'</a></li>';
-					}
-					echo "
-					<li>
-						<a href=?page=".(int)$str_pag ." aria-label='Next'>
-							<span aria-hidden='true'>&raquo;</span>
-						</a>
-					</li>
-					";
-					echo "</ul>";
-			}else{
-				echo "
-					<p style='display: flex;justify-content: center;margin: 20px 0;'>В моей базе нету данных!</p>
-				";
-			}
-				echo "</nav>";
-			echo "</div>";
+			<?php 
+				RenderListReview($input, $db, $arr, $art, $kol);
 			?>
 
 			<div id="form">
-				<form action='http://localhost/work/miniproekty/' method="POST">
+				<form method="POST">
 					<p><input class="form-control" name="Nick" placeholder="Ваше имя"></p>
 					<p><textarea class="form-control" name="Text" placeholder="Ваш отзыв"></textarea></p>
 					<p><input type="submit" name="save" class="btn btn-info btn-block" value="Сохранить"></p>
 				</form>
 			</div>
 		</div>
-
-		
 	</body>
 </html>
